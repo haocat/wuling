@@ -59,6 +59,10 @@ class ClimateEntity(XEntity, BaseEntity):
             HVACMode.COOL: HVACAction.COOLING,
             HVACMode.HEAT: HVACAction.HEATING,
         }.get(self._attr_hvac_mode)
+        if 'current_temperature' in data:
+            self._attr_current_temperature = data['current_temperature']
+        if 'target_temperature' in data:
+            self._attr_target_temperature = data['target_temperature']
 
     async def async_set_temperature(self, **kwargs):
         """Set new target temperature."""
@@ -73,11 +77,10 @@ class ClimateEntity(XEntity, BaseEntity):
         """Handle HVAC mode changes with fixed payloads for COOL/HEAT."""
         ret = None
         if hvac_mode == HVACMode.OFF:
-            ret = await self.async_ac_control(accOnOff='0', status='0')
+            ret = await self.async_ac_control(accOnOff='0')
         elif hvac_mode == HVACMode.COOL:
             ret = await self._fixed_request(
                 temperature="17",
-                status="1",
                 blowerLvl="7",
                 accOnOff="1",
                 duration="20"
@@ -85,7 +88,6 @@ class ClimateEntity(XEntity, BaseEntity):
         elif hvac_mode == HVACMode.HEAT:
             ret = await self._fixed_request(
                 temperature="33",
-                status="1",
                 blowerLvl="7",
                 accOnOff="1",
                 duration="20"
@@ -105,6 +107,7 @@ class ClimateEntity(XEntity, BaseEntity):
     async def async_ac_control(self, **kwargs):
         """Generic A/C control: use current entity state as fallback."""
         result = await self.coordinator.async_request('car/control/acc', json={
+            'vin': self.vin,
             'accOnOff': '1',
             'duration': '10',
             'blowerLvl': str(self.fan_mode or 3),
@@ -115,5 +118,8 @@ class ClimateEntity(XEntity, BaseEntity):
 
     async def _fixed_request(self, **fixed_json):
         """Send fixed JSON payload and return boolean result."""
-        result = await self.coordinator.async_request('car/control/acc', json=fixed_json) or {}
+        result = await self.coordinator.async_request('car/control/acc', json={
+            'vin': self.vin,
+            **fixed_json,
+        }) or {}
         return result.get('result')

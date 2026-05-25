@@ -127,6 +127,9 @@
       "motor_temp": {
         "name": "电机温度"
       },
+      "obc_temp": {
+        "name": "OBC温度"
+      },
       "left_battery_power": {
         "name": "剩余可用电量"
       }

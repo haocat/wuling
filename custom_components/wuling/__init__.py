@@ -284,7 +284,7 @@ class StateCoordinator(DataUpdateCoordinator):
             }).with_option({
                 'icon': 'mdi:air-conditioner',
             }),
-            NumberSensorConv('current_temperature', prop='carStatus.invActTemp', parent='ac'),
+            NumberSensorConv('current_temperature', prop='carStatus.interiorTemperature', parent='ac'),
             NumberSensorConv('target_temperature', prop='carStatus.accCntTemp', parent='ac'),
 
             ButtonConv('search_car', press='async_search_car').with_option({
@@ -387,8 +387,16 @@ class StateCoordinator(DataUpdateCoordinator):
                 'unit_of_measurement': PERCENTAGE,
             }),
 
-            # Motor temperature
-            NumberSensorConv('motor_temp', prop='carStatus.tmActTemp').with_option({
+            # Motor temperature (驱动电机温度)
+            NumberSensorConv('motor_temp', prop='carStatus.invActTemp').with_option({
+                'state_class': SensorStateClass.MEASUREMENT,
+                'device_class': SensorDeviceClass.TEMPERATURE,
+                'entity_category': EntityCategory.DIAGNOSTIC,
+                'unit_of_measurement': UnitOfTemperature.CELSIUS,
+            }),
+
+            # OBC temperature (充电机温度)
+            NumberSensorConv('obc_temp', prop='carStatus.tmActTemp').with_option({
                 'state_class': SensorStateClass.MEASUREMENT,
                 'device_class': SensorDeviceClass.TEMPERATURE,
                 'entity_category': EntityCategory.DIAGNOSTIC,
