@@ -347,6 +347,90 @@ class StateCoordinator(DataUpdateCoordinator):
                 'entity_category': EntityCategory.DIAGNOSTIC,
                 'unit_of_measurement': UnitOfPressure.KPA,
             }),
+
+            # Tailgate control
+            ButtonConv('tailgate', press='async_control_tailgate').with_option({
+                'icon': 'mdi:car-back',
+            }),
+            BinarySensorConv('tail_door_locked', prop='carStatus.tailDoorLockStatus').with_option({
+                'icon': 'mdi:car-door-lock',
+                'device_class': BinarySensorDeviceClass.LOCK,
+            }),
+
+            # Yesterday mileage
+            NumberSensorConv('yesterday_mileage', prop='yesterdayMileage.trip').with_option({
+                'icon': 'mdi:counter',
+                'state_class': SensorStateClass.MEASUREMENT,
+                'device_class': SensorDeviceClass.DISTANCE,
+                'unit_of_measurement': UnitOfLength.KILOMETERS,
+            }),
+
+            # Battery min/max temperature
+            NumberSensorConv('battery_min_temp', prop='carStatus.batMinTemp').with_option({
+                'state_class': SensorStateClass.MEASUREMENT,
+                'device_class': SensorDeviceClass.TEMPERATURE,
+                'entity_category': EntityCategory.DIAGNOSTIC,
+                'unit_of_measurement': UnitOfTemperature.CELSIUS,
+            }),
+            NumberSensorConv('battery_max_temp', prop='carStatus.batMaxTemp').with_option({
+                'state_class': SensorStateClass.MEASUREMENT,
+                'device_class': SensorDeviceClass.TEMPERATURE,
+                'entity_category': EntityCategory.DIAGNOSTIC,
+                'unit_of_measurement': UnitOfTemperature.CELSIUS,
+            }),
+
+            # Battery SOH
+            NumberSensorConv('battery_soh', prop='carStatus.batSOH').with_option({
+                'icon': 'mdi:battery-heart-variant',
+                'state_class': SensorStateClass.MEASUREMENT,
+                'entity_category': EntityCategory.DIAGNOSTIC,
+                'unit_of_measurement': PERCENTAGE,
+            }),
+
+            # Motor temperature
+            NumberSensorConv('motor_temp', prop='carStatus.tmActTemp').with_option({
+                'state_class': SensorStateClass.MEASUREMENT,
+                'device_class': SensorDeviceClass.TEMPERATURE,
+                'entity_category': EntityCategory.DIAGNOSTIC,
+                'unit_of_measurement': UnitOfTemperature.CELSIUS,
+            }),
+
+            # Left battery power
+            NumberSensorConv('left_battery_power', prop='carStatus.leftBatteryPower').with_option({
+                'icon': 'mdi:car-battery',
+                'state_class': SensorStateClass.MEASUREMENT,
+                'entity_category': EntityCategory.DIAGNOSTIC,
+            }),
+
+            # Light status
+            BinarySensorConv('front_fog_light', prop='carStatus.frontFogLight').with_option({
+                'icon': 'mdi:fog-light',
+            }),
+            BinarySensorConv('left_turn_light', prop='carStatus.leftTurnLight').with_option({
+                'icon': 'mdi:turn-light-left',
+            }),
+            BinarySensorConv('position_light', prop='carStatus.positionLight').with_option({
+                'icon': 'mdi:car-parking-lights',
+            }),
+            BinarySensorConv('right_turn_light', prop='carStatus.rightTurnLight').with_option({
+                'icon': 'mdi:turn-light-right',
+            }),
+            BinarySensorConv('dip_head_light', prop='carStatus.dipHeadLight').with_option({
+                'icon': 'mdi:car-light-dimmed',
+            }),
+            BinarySensorConv('low_beam_light', prop='carStatus.lowBeamLight').with_option({
+                'icon': 'mdi:car-light-low',
+            }),
+
+            # Sentinel mode
+            BinarySensorConv('sentinel_mode', prop='carStatus.sentinelModeStatus').with_option({
+                'icon': 'mdi:shield-car',
+            }),
+
+            # Charging indicator
+            BinarySensorConv('charging_indicator', prop='carStatus.vecChrgStsIndOn').with_option({
+                'icon': 'mdi:ev-station',
+            }),
         ]
 
     @property
@@ -411,6 +495,7 @@ class StateCoordinator(DataUpdateCoordinator):
         if minute % 10 == 0 or 'checkStatus' not in self.data:
             await self.async_update_check()
             await self.async_update_tire()
+            await self.async_update_yesterday_mileage()
 
         return self.data
 
@@ -424,6 +509,14 @@ class StateCoordinator(DataUpdateCoordinator):
     async def async_search_car(self):
         result = await self.async_request('car/control/searchCar', json={
             'vin': self.vin,
+        })
+        data = result.get('data') or {}
+        return data
+
+    async def async_control_tailgate(self):
+        result = await self.async_request('car/control/tailgate', json={
+            'vin': self.vin,
+            'status': '0',
         })
         data = result.get('data') or {}
         return data
@@ -450,6 +543,14 @@ class StateCoordinator(DataUpdateCoordinator):
         })
         data = result.pop('data', None) or {}
         self.data['tirePressure'] = data
+        return data
+
+    async def async_update_yesterday_mileage(self):
+        result = await self.async_request('car/yesterday/mileage', json={
+            'vin': self.vin,
+        })
+        data = result.pop('data', None) or {}
+        self.data['yesterdayMileage'] = data
         return data
 
     async def async_request(self, api: str, **kwargs):

@@ -33,6 +33,9 @@
       },
       "search_car": {
         "name": "双闪鸣笛"
+      },
+      "tailgate": {
+        "name": "尾箱控制"
       }
     },
     "sensor": {
@@ -108,6 +111,24 @@
       },
       "tire_pressure_rr": {
         "name": "胎压右后"
+      },
+      "yesterday_mileage": {
+        "name": "昨日里程"
+      },
+      "battery_min_temp": {
+        "name": "电池最低温度"
+      },
+      "battery_max_temp": {
+        "name": "电池最高温度"
+      },
+      "battery_soh": {
+        "name": "电池SOH"
+      },
+      "motor_temp": {
+        "name": "电机温度"
+      },
+      "left_battery_power": {
+        "name": "剩余可用电量"
       }
     },
     "binary_sensor": {
@@ -152,6 +173,33 @@
       },
       "power_steering": {
         "name": "转向助力"
+      },
+      "tail_door_locked": {
+        "name": "尾门锁"
+      },
+      "front_fog_light": {
+        "name": "前雾灯"
+      },
+      "left_turn_light": {
+        "name": "左转向灯"
+      },
+      "position_light": {
+        "name": "示廓灯"
+      },
+      "right_turn_light": {
+        "name": "右转向灯"
+      },
+      "dip_head_light": {
+        "name": "近光灯"
+      },
+      "low_beam_light": {
+        "name": "远光灯"
+      },
+      "sentinel_mode": {
+        "name": "哨兵模式"
+      },
+      "charging_indicator": {
+        "name": "充电指示"
       }
     },
     "lock": {
