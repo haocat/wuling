@@ -150,9 +150,6 @@
       "plugging": {
         "name": "充电枪状态"
       },
-      "vec_charge_sts": {
-        "name": "否正在充电"
-      },
       "charging_power": {
         "name": "充电功率"
       },
